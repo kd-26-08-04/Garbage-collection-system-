@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+motor
+pymongo
+python-multipart
+python-dotenv
+ultralytics
+torch
+torchvision
+Pillow
