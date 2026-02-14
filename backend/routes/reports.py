@@ -45,7 +45,7 @@ async def create_report(
         "longitude": longitude,
         "confidence_score": max_conf,
         "timestamp": datetime.utcnow(),
-        "status": "detected"
+        "status": "pending"
     }
     
     # 5. Save to MongoDB
@@ -55,6 +55,28 @@ async def create_report(
         "id": str(result.inserted_id),
         "status": "success",
         "detections": detections
+    }
+
+@router.get("/summary")
+async def get_summary():
+    # 1. Total Reports
+    total_reports = await db.reports.count_documents({})
+    
+    # 2. Count by status
+    pending_count = await db.reports.count_documents({"status": "pending"})
+    cleaned_count = await db.reports.count_documents({"status": "cleaned"})
+    detected_count = await db.reports.count_documents({"status": "detected"})
+    
+    # 3. Today's Activity (UTC for simplicity)
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_count = await db.reports.count_documents({"timestamp": {"$gte": today_start}})
+    
+    return {
+        "total": total_reports,
+        "pending": pending_count,
+        "cleaned": cleaned_count,
+        "detected": detected_count,
+        "today_activity": today_count
     }
 
 @router.get("/")
